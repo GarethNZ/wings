@@ -11,7 +11,8 @@ import (
 
 // Configure configures the routing infrastructure for this daemon instance.
 func Configure(m *wserver.Manager, client remote.Client) *gin.Engine {
-	gin.SetMode("release")
+	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.DebugMode)
 
 	router := gin.New()
 	router.Use(gin.Recovery())

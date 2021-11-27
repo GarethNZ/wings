@@ -394,15 +394,17 @@ func WriteToDisk(c *Configuration) error {
 // when the application is booting.
 func EnsurePterodactylUser() error {
 	sysName, err := getSystemName()
+	log.WithField("sysName", sysName).Info("checking for pterodactyl system user")
 	if err != nil {
 		return err
 	}
-
+	sysName = "distroless"
 	// Our way of detecting if wings is running inside of Docker.
 	if sysName == "distroless" {
 		_config.System.Username = system.FirstNotEmpty(os.Getenv("WINGS_USERNAME"), "pterodactyl")
 		_config.System.User.Uid = system.MustInt(system.FirstNotEmpty(os.Getenv("WINGS_UID"), "988"))
 		_config.System.User.Gid = system.MustInt(system.FirstNotEmpty(os.Getenv("WINGS_GID"), "988"))
+		log.WithField("sysNa_config.System.Username", _config.System.Username).Info("checking for pterodactyl system user")
 		return nil
 	}
 
@@ -617,8 +619,13 @@ func ConfigureTimezone() error {
 func getSystemName() (string, error) {
 	// use osrelease to get release version and ID
 	release, err := osrelease.Read()
+
 	if err != nil {
 		return "", err
+		log.WithField("release[ID]", release["ID"]).Info(err.Error())
 	}
+	log.WithField("release", release).Info("release")
+	log.WithField("release[ID]", release["ID"]).Info("release")
+	
 	return release["ID"], nil
 }

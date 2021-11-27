@@ -175,7 +175,8 @@ func (e *Environment) Create() error {
 	conf := &container.Config{
 		Hostname:     e.Id,
 		Domainname:   config.Get().Docker.Domainname,
-		User:         strconv.Itoa(config.Get().System.User.Uid),
+		// LINUX User:         strconv.Itoa(config.Get().System.User.Uid),
+		// WINDOWS User:         config.Get().System.Username, // WINDOWS
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -190,7 +191,7 @@ func (e *Environment) Create() error {
 		},
 	}
 
-	tmpfsSize := strconv.Itoa(int(config.Get().Docker.TmpfsSize))
+	// Not for windows tmpfsSize := strconv.Itoa(int(config.Get().Docker.TmpfsSize))
 
 	hostConf := &container.HostConfig{
 		PortBindings: a.DockerBindings(),
@@ -201,9 +202,9 @@ func (e *Environment) Create() error {
 
 		// Configure the /tmp folder mapping in containers. This is necessary for some
 		// games that need to make use of it for downloads and other installation processes.
-		Tmpfs: map[string]string{
-			"/tmp": "rw,exec,nosuid,size=" + tmpfsSize + "M",
-		},
+		// not for windows Tmpfs: map[string]string{
+		// 	"/tmp": "rw,exec,nosuid,size=" + tmpfsSize + "M",
+		// },
 
 		// Define resource limits for the container based on the data passed through
 		// from the Panel.
@@ -224,8 +225,9 @@ func (e *Environment) Create() error {
 			},
 		},
 
-		SecurityOpt:    []string{"no-new-privileges"},
-		ReadonlyRootfs: true,
+		// LINUX SecurityOpt:    []string{"no-new-privileges"},
+		// LINUX ReadonlyRootfs: true,
+		ReadonlyRootfs: false, // WINDOWS
 		CapDrop: []string{
 			"setpcap", "mknod", "audit_write", "net_raw", "dac_override",
 			"fowner", "fsetid", "net_bind_service", "sys_chroot", "setfcap",
@@ -233,6 +235,7 @@ func (e *Environment) Create() error {
 		NetworkMode: container.NetworkMode(config.Get().Docker.Network.Mode),
 	}
 
+	log.WithField("conf", conf).WithField("hostConf", hostConf).Debug("Config sent to container create")
 	if _, err := e.client.ContainerCreate(context.Background(), conf, hostConf, nil, nil, e.Id); err != nil {
 		return errors.Wrap(err, "environment/docker: failed to create container")
 	}
@@ -477,9 +480,9 @@ func (e *Environment) convertMounts() []mount.Mount {
 	for _, m := range e.Configuration.Mounts() {
 		out = append(out, mount.Mount{
 			Type:     mount.TypeBind,
-			Source:   m.Source,
+			Source:   m.Source, //strings.Replace(m.Source, "\\", "////", -1), // WINDOWS ONLY
 			Target:   m.Target,
-			ReadOnly: m.ReadOnly,
+			ReadOnly: false, //m.ReadOnly, // "Windows does not support root filesystem in read-only mode" 
 		})
 	}
 
@@ -488,18 +491,18 @@ func (e *Environment) convertMounts() []mount.Mount {
 
 func (e *Environment) resources() container.Resources {
 	l := e.Configuration.Limits()
-	pids := l.ProcessLimit()
+	// NOT FOR WINDOWS pids := l.ProcessLimit()
 
 	return container.Resources{
 		Memory:            l.BoundedMemoryLimit(),
 		MemoryReservation: l.MemoryLimit * 1_000_000,
 		MemorySwap:        l.ConvertedSwap(),
 		CPUQuota:          l.ConvertedCpuLimit(),
-		CPUPeriod:         100_000,
+		// NOT FOR WINDOWS CPUPeriod:         100_000,
 		CPUShares:         1024,
-		BlkioWeight:       l.IoWeight,
-		OomKillDisable:    &l.OOMDisabled,
+		// NOT FOR WINDOWS BlkioWeight:       l.IoWeight,
+		// NOT FOR WINDOWS OomKillDisable:    &l.OOMDisabled,
 		CpusetCpus:        l.Threads,
-		PidsLimit:         &pids,
+		// NOT FOR WINDOWS PidsLimit:         &pids,
 	}
 }

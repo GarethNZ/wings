@@ -23,7 +23,8 @@ func (s *Server) Mounts() []environment.Mount {
 	m := []environment.Mount{
 		{
 			Default:  true,
-			Target:   "/home/container",
+			//Target:   "/home/container", // Linux
+			Target:   "C:/container", // Windows
 			Source:   s.Filesystem().Path(),
 			ReadOnly: false,
 		},

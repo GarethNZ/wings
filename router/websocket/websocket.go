@@ -280,6 +280,8 @@ func (h *Handler) HandleInbound(ctx context.Context, m Message) error {
 		}
 	}
 
+	h.Logger().WithField("m.Event", m.Event).WithField("ServerState", h.server.Environment.State()).Debug("HandleInbound: Server got event")
+		
 	switch m.Event {
 	case AuthenticationEvent:
 		{

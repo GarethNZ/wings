@@ -33,7 +33,8 @@ type Allocations struct {
 func (a *Allocations) Bindings() nat.PortMap {
 	out := nat.PortMap{}
 
-	for ip, ports := range a.Mappings {
+	//for ip, ports := range a.Mappings {
+	for _, ports := range a.Mappings {
 		for _, port := range ports {
 			// Skip over invalid ports.
 			if port < 1 || port > 65535 {
@@ -41,7 +42,7 @@ func (a *Allocations) Bindings() nat.PortMap {
 			}
 
 			binding := nat.PortBinding{
-				HostIP:   ip,
+				// NOT FOR WINDOWS HostIP:   ip,
 				HostPort: strconv.Itoa(port),
 			}
 
@@ -60,7 +61,7 @@ func (a *Allocations) Bindings() nat.PortMap {
 // any reference to 127.0.0.1 with the IP of the pterodactyl0 network interface which will allow the
 // server to operate on a local address while still being accessible by other containers.
 func (a *Allocations) DockerBindings() nat.PortMap {
-	iface := config.Get().Docker.Network.Interface
+	//iface := config.Get().Docker.Network.Interface
 
 	out := a.Bindings()
 	// Loop over all the bindings for this container, and convert any that reference 127.0.0.1
@@ -77,7 +78,7 @@ func (a *Allocations) DockerBindings() nat.PortMap {
 				out[p] = append(out[p][:i], out[p][i+1:]...)
 			} else {
 				out[p][i] = nat.PortBinding{
-					HostIP:   iface,
+					// NOT FOR WINDOWS HostIP:   iface,
 					HostPort: alloc.HostPort,
 				}
 			}
