@@ -18,6 +18,7 @@ import (
 
 // Returns information about the system that wings is running on.
 func getSystemInformation(c *gin.Context) {
+	TODO: Seems this works and looks like it returns good stuff. but the server doesn't like it?!??!
 	i, err := system.GetSystemInformation()
 	if err != nil {
 		NewTrackedError(err).Abort(c)

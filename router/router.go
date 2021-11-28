@@ -11,10 +11,12 @@ import (
 
 // Configure configures the routing infrastructure for this daemon instance.
 func Configure(m *wserver.Manager, client remote.Client) *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
-	//gin.SetMode(gin.DebugMode)
+	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 
 	router := gin.New()
+	// Tell gin to use apex_gin middleware
+	router.Use(middleware.Handler("test message"))
 	router.Use(gin.Recovery())
 	router.Use(middleware.AttachRequestID(), middleware.CaptureErrors(), middleware.SetAccessControlHeaders())
 	router.Use(middleware.AttachServerManager(m), middleware.AttachApiClient(client))

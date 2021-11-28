@@ -88,7 +88,7 @@ func (e *Environment) Start(ctx context.Context) error {
 		// to truncate them.
 		if _, err := os.Stat(c.LogPath); err == nil {
 			if err := os.Truncate(c.LogPath, 0); err != nil {
-				return errors.Wrap(err, "environment/docker: failed to truncate instance logs")
+				return errors.Wrap(err, "environment/docker: failed to truncate instance logs") // Reliably Fails on Windows as it needs admin permissions?
 			}
 		}
 	}

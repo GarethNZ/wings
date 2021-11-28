@@ -145,6 +145,7 @@ func postServerSync(c *gin.Context) {
 // Performs a server installation in a background thread.
 func postServerInstall(c *gin.Context) {
 	s := ExtractServer(c)
+	s.Log().WithField("s", s).Debug("postServerInstall")
 
 	go func(serv *server.Server) {
 		if err := serv.Install(true); err != nil {
@@ -158,7 +159,7 @@ func postServerInstall(c *gin.Context) {
 // Reinstalls a server.
 func postServerReinstall(c *gin.Context) {
 	s := ExtractServer(c)
-
+	s.Log().WithField("s", s).Debug("postServerReinstall")
 	if s.ExecutingPowerAction() {
 		c.AbortWithStatusJSON(http.StatusConflict, gin.H{
 			"error": "Cannot execute server reinstall event while another power action is running.",

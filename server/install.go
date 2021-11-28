@@ -77,6 +77,7 @@ func (s *Server) Install(sync bool) error {
 // Reinstalls a server's software by utilizing the install script for the server egg. This
 // does not touch any existing files for the server, other than what the script modifies.
 func (s *Server) Reinstall() error {
+	s.Log().WithField("s", s).Debug("Reinstall")
 	if s.Environment.State() != environment.ProcessOfflineState {
 		s.Log().Debug("waiting for server instance to enter a stopped state")
 		if err := s.Environment.WaitForStop(10, true); err != nil {
