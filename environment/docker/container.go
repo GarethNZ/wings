@@ -138,7 +138,7 @@ func (e *Environment) InSituUpdate() error {
 	if _, err := e.client.ContainerUpdate(ctx, e.Id, container.UpdateConfig{
 		Resources: e.Configuration.Limits().AsContainerResources(),
 	}); err != nil {
-		return errors.Wrap(err, "environment/docker: could not update container")
+		return errors.Wrap(err, "environment/docker: could not update container") // TODO: Not supported on windows
 	}
 	return nil
 }
@@ -173,8 +173,8 @@ func (e *Environment) Create() error {
 	}
 
 	conf := &container.Config{
-		Hostname:     e.Id,
-		Domainname:   config.Get().Docker.Domainname,
+		Hostname:   e.Id,
+		Domainname: config.Get().Docker.Domainname,
 		// LINUX User:         strconv.Itoa(config.Get().System.User.Uid),
 		// WINDOWS User:         config.Get().System.Username, // WINDOWS
 		AttachStdin:  true,
@@ -482,7 +482,7 @@ func (e *Environment) convertMounts() []mount.Mount {
 			Type:     mount.TypeBind,
 			Source:   m.Source, //strings.Replace(m.Source, "\\", "////", -1), // WINDOWS ONLY
 			Target:   m.Target,
-			ReadOnly: false, //m.ReadOnly, // "Windows does not support root filesystem in read-only mode" 
+			ReadOnly: false, //m.ReadOnly, // "Windows does not support root filesystem in read-only mode"
 		})
 	}
 
@@ -494,15 +494,16 @@ func (e *Environment) resources() container.Resources {
 	// NOT FOR WINDOWS pids := l.ProcessLimit()
 
 	return container.Resources{
-		Memory:            l.BoundedMemoryLimit(),
-		MemoryReservation: l.MemoryLimit * 1_000_000,
-		MemorySwap:        l.ConvertedSwap(),
-		CPUQuota:          l.ConvertedCpuLimit(),
+		// TODO: FIX INDENT :|
+		Memory: l.BoundedMemoryLimit(),
+		// NOT FOR WINDOWS MemoryReservation: l.MemoryLimit * 1_000_000,
+		// NOT FOR WINDOWS MemorySwap: l.ConvertedSwap(),
+		CPUQuota: l.ConvertedCpuLimit(),
 		// NOT FOR WINDOWS CPUPeriod:         100_000,
-		CPUShares:         1024,
+		CPUShares: 1024,
 		// NOT FOR WINDOWS BlkioWeight:       l.IoWeight,
 		// NOT FOR WINDOWS OomKillDisable:    &l.OOMDisabled,
-		CpusetCpus:        l.Threads,
+		CpusetCpus: l.Threads,
 		// NOT FOR WINDOWS PidsLimit:         &pids,
 	}
 }

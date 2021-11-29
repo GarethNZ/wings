@@ -1,5 +1,2 @@
-Server info
-    https://gameadmin.home.garethnz.com/admin/nodes/view/5
-
-Server (re-)install
-    https://gameadmin.home.garethnz.com/admin/servers/view/12/manage
+RUNNNING RISK OF RAIN 2 in the container
+Execution " & '.\Risk of Rain 2.exe' " exits immediately

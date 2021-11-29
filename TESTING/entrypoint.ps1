@@ -27,9 +27,12 @@ $MODIFIED_STARTUP = $ENV:STARTUP -replace "{{","%" -replace "}}", "%" | ForEach-
 
 # Win Executables spawn their own process and do not block this process
 # Assuming they all need this for now
-$MODIFIED_STARTUP += " | Wait-Process"
+# $MODIFIED_STARTUP += " | Wait-Process"
+# TODO:
+# Satisfactory needs this
+# Risk of rain 2 does not
 
-Write-Output ":/home/container$ $MODIFIED_STARTUP"
+Write-Output ":/home/container\$ $MODIFIED_STARTUP"
 
 # Run the Server
 Invoke-Expression $MODIFIED_STARTUP

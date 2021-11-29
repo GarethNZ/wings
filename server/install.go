@@ -220,7 +220,8 @@ func (ip *InstallationProcess) writeScriptToDisk() error {
 		return errors.WithMessage(err, "could not create temporary directory for install process")
 	}
 
-	f, err := os.OpenFile(filepath.Join(ip.tempDir(), "install.sh"), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
+	// LINUX f, err := os.OpenFile(filepath.Join(ip.tempDir(), "install.sh"), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
+	f, err := os.OpenFile(filepath.Join(ip.tempDir(), "install.ps1"), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644) // WINDOWS
 	if err != nil {
 		return errors.WithMessage(err, "failed to write server installation script to disk before mount")
 	}
@@ -411,9 +412,10 @@ func (ip *InstallationProcess) Execute() (string, error) {
 		AttachStdin:  true,
 		OpenStdin:    true,
 		Tty:          true,
-		Cmd:          []string{ip.Script.Entrypoint, "/mnt/install/install.sh"},
-		Image:        ip.Script.ContainerImage,
-		Env:          ip.Server.GetEnvironmentVariables(),
+		// LINUX Cmd:          []string{ip.Script.Entrypoint, "/mnt/install/install.sh"},
+		Cmd:   []string{ip.Script.Entrypoint, "/mnt/install/install.ps1"}, // WINDOWS
+		Image: ip.Script.ContainerImage,
+		Env:   ip.Server.GetEnvironmentVariables(),
 		Labels: map[string]string{
 			"Service":       "Pterodactyl",
 			"ContainerType": "server_installer",
@@ -424,13 +426,15 @@ func (ip *InstallationProcess) Execute() (string, error) {
 	hostConf := &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
-				Target:   "/mnt/server",
+				// LINUX Target:   "/mnt/server",
+				Target:   "C:/mnt/server", // WINDOWS
 				Source:   ip.Server.Filesystem().Path(),
 				Type:     mount.TypeBind,
 				ReadOnly: false,
 			},
 			{
-				Target:   "/mnt/install",
+				// LINUX Target:   "/mnt/install",
+				Target:   "C:/mnt/install", // WINDOWS
 				Source:   ip.tempDir(),
 				Type:     mount.TypeBind,
 				ReadOnly: false,
@@ -449,7 +453,8 @@ func (ip *InstallationProcess) Execute() (string, error) {
 				"compress": "false",
 			},
 		},
-		Privileged:  true,
+		//Privileged:  true, // LINUX
+		Privileged:  false, // WINDOWS
 		NetworkMode: container.NetworkMode(config.Get().Docker.Network.Mode),
 	}
 
@@ -461,7 +466,8 @@ func (ip *InstallationProcess) Execute() (string, error) {
 		return "", err
 	}
 
-	ip.Server.Log().WithField("install_script", ip.tempDir()+"/install.sh").Info("creating install container for server process")
+	// LINUX ip.Server.Log().WithField("install_script", ip.tempDir()+"/install.sh").Info("creating install container for server process")
+	ip.Server.Log().WithField("install_script", ip.tempDir()+"/install.ps1").Info("creating install container for server process") // WINDOWS
 	// Remove the temporary directory when the installation process finishes for this server container.
 	defer func() {
 		if err := os.RemoveAll(ip.tempDir()); err != nil {

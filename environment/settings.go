@@ -109,15 +109,15 @@ func (l Limits) AsContainerResources() container.Resources {
 	// NOT FOR WINDOWS pids := l.ProcessLimit()
 
 	return container.Resources{
-		Memory:            l.BoundedMemoryLimit(),
-		MemoryReservation: l.MemoryLimit * 1_000_000,
-		MemorySwap:        l.ConvertedSwap(),
-		CPUQuota:          l.ConvertedCpuLimit(),
+		Memory: l.BoundedMemoryLimit(),
+		// NOT FOR WINDOWS MemoryReservation: l.MemoryLimit * 1_000_000,
+		// NOT FOR WINDOWS MemorySwap: l.ConvertedSwap(),
+		CPUQuota: l.ConvertedCpuLimit(),
 		// NOT FOR WINDOWS CPUPeriod:         100_000,
-		CPUShares:         1024,
+		CPUShares: 1024,
 		// NOT FOR WINDOWS BlkioWeight:       l.IoWeight,
 		// NOT FOR WINDOWS OomKillDisable:    &l.OOMDisabled,
-		CpusetCpus:        l.Threads,
+		CpusetCpus: l.Threads,
 		// NOT FOR WINDOWS PidsLimit:         &pids,
 	}
 }
